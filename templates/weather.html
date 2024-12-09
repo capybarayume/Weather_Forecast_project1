@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Weather and Temperature</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 630px;
+            padding: 8px;
+        }
+        .slider-value {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #333;
+        }
+        .input1{
+            width: 650px;     
+            height: 50px;     
+            text-align: left;
+            padding: 0;
+            font-size: 16px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        select {
+            width: 650px;     
+            height: 50px;    
+            text-align: center;
+            padding: 0;
+            font-size: 16px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            appearance: none; 
+        }
+        
+        select::-ms-expand {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Weather Forecast</h1>
+
+    <form action="" method="get">
+        <div class="form-group">
+            <label for="dropdown2">Select Option 1:</label>
+            <input  class="input1" name="place" placeholder="Enter a city or country">
+        </div>
+
+        <div class="form-group">
+            <label for="slider">Forecast Days:</label>
+            <input  type="range" id="slider" min="1" max="5" value="1" name="day" oninput="updateSliderValue(this.value)">
+            <div class="slider-value" id="sliderValue">1</div>
+        </div>
+
+        <div class="form-group">
+            <label for="dropdown2">Select data to view (option2):</label>
+            <select id="dropdown2" name="dropdown2">
+                <option value="Temperature" {% if select_option2 == 'optionA' %}selected{% endif %}>Temperature</option>
+                <option value="Sky" {% if select_option2 == 'optionB' %}selected{% endif %}>Sky</option>
+            </select>
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+
+   
+        {% if select_option2 == 'Temperature' %}
+            <h3>Temperature in the next {{ select_day }} days in {{ select_place }}</h3>
+            <div>
+                <canvas id="myChart"></canvas>
+            </div>
+        {% elif select_option2 == 'Sky' %}
+            <h3>Sky conditions in the next {{ select_day }} days in {{ select_place }}</h3>
+            <div>
+                {% for image in images%}
+                    <img src="{{ url_for('static', filename=image) }}" style="max-width: 100%; height: auto;">
+                {% endfor %}
+            </div>
+        {% else %}
+            Please Input All Information.
+        {% endif %}
+
+
+    <script>
+        const dates = {{ dates | default([]) | tojson }};
+        const temps = {{ temps | default([]) | tojson }};
+
+        const data = {
+                labels: dates,
+                datasets: [{
+                label: 'Temperature',
+                data: temps,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+                }]
+            };
+
+       
+        const config = {
+            type: 'line',      
+            data: data,        
+            options: {         
+            responsive: true,
+            plugins: {
+                title: {
+                display: true,
+                text: 'Weather Forecast'
+                }
+            }
+            }
+        };
+
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, config);
+        const actionContainer = document.getElementById('action-buttons');
+        actions.forEach(action => {
+        const button = document.createElement('button');
+        button.innerText = action.name;
+        button.onclick = () => action.handler(myChart);
+        actionContainer.appendChild(button);
+        });
+    </script>
+
+    <script>
+        function updateSliderValue(value) {
+            document.getElementById('sliderValue').innerText = value;
+        }
+    </script>
+    <script>
+        const actions = [
+        {
+            name: 'pointStyle: circle (default)',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'circle';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: cross',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'cross';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: crossRot',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'crossRot';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: dash',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'dash';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: line',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'line';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: rect',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'rect';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: rectRounded',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'rectRounded';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: rectRot',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'rectRot';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: star',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'star';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: triangle',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = 'triangle';
+            });
+            chart.update();
+            }
+        },
+        {
+            name: 'pointStyle: false',
+            handler: (chart) => {
+            chart.data.datasets.forEach(dataset => {
+                dataset.pointStyle = false;
+            });
+            chart.update();
+            }
+        }
+        ];
+    </script>
+
+</body>
+</html>
